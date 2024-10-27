@@ -813,7 +813,7 @@ class _DefaultLocalizations implements SfLocalizations {
   String get pdfTextSelectionMenuHighlightLabel => 'Highlight';
 
   @override
-  String get pdfTextSelectionMenuStrikethroughLabel => 'Strikethrough';
+  String get pdfTextSelectionMenuStrikethroughLabel => 'Translate';
 
   @override
   String get pdfTextSelectionMenuUnderlineLabel => 'Underline';

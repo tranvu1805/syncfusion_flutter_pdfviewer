@@ -230,6 +230,15 @@ class _TextSelectionMenuItemState extends State<TextSelectionMenuItem> {
             : Colors.white.withOpacity(0.87),
       );
     }
+    if (mode == 'Translate') {
+      return Icon(
+        Icons.translate_outlined,
+        size: 16,
+        color: (widget.themeData!.colorScheme.brightness == Brightness.light)
+            ? Colors.black.withOpacity(0.87)
+            : Colors.white.withOpacity(0.87),
+      );
+    }
     mode = mode.toLowerCase().replaceAll(RegExp(r' '), '');
     return ImageIcon(
       AssetImage('assets/$mode.png', package: 'syncfusion_flutter_pdfviewer'),
