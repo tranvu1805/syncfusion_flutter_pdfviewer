@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:syncfusion_flutter_core/localizations.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
+import 'package:translator/translator.dart';
 
 import 'annotation/annotation.dart';
 import 'annotation/annotation_settings.dart';
@@ -1209,6 +1210,7 @@ class SfPdfViewerState extends State<SfPdfViewer> with WidgetsBindingObserver {
   /// Undo redo controller
   late ChangeTracker _changeTracker;
   UndoHistoryController? _undoController;
+
   UndoHistoryController get _effectiveUndoController =>
       widget.undoController ?? (_undoController ??= UndoHistoryController());
 
@@ -1225,6 +1227,7 @@ class SfPdfViewerState extends State<SfPdfViewer> with WidgetsBindingObserver {
   OverlayEntry? _stickyNoteEditTextOverlyEntry;
   final TextEditingController _stickyNoteTextController =
       TextEditingController();
+  late TextEditingController _textTranslateController;
   final FocusNode _stickyNoteFocusNode = FocusNode();
 
   /// Used to extract text from the PDF document.
@@ -4429,7 +4432,13 @@ class SfPdfViewerState extends State<SfPdfViewer> with WidgetsBindingObserver {
             themeData: _themeData,
             localizations: _localizations,
             onSelected: (String value) {
-              if (value != 'Copy') {
+              if (value == 'Translate') {
+                _translateMenu(_pdfPagesKey[_selectedTextPageNumber]
+                    ?.currentState
+                    ?.canvasRenderBox!
+                    .getSelectionDetails()
+                    .copiedText);
+              } else if (value != 'Copy') {
                 final PdfAnnotationMode annotationMode = value == 'Highlight'
                     ? PdfAnnotationMode.highlight
                     : value == 'Underline'
@@ -4458,6 +4467,145 @@ class SfPdfViewerState extends State<SfPdfViewer> with WidgetsBindingObserver {
     );
 
     Overlay.of(context, rootOverlay: true).insert(_textSelectionOverlayEntry!);
+  }
+
+  /// Translate with package translator
+  Future<void> _translateMenu(String? text) async {
+    _textTranslateController = TextEditingController(text: text);
+    _hideTextSelectionMenu();
+    final translator = GoogleTranslator();
+    final translationEdit =
+        await translator.translate(_textTranslateController.text, to: 'vi');
+    final String data = translationEdit.toString();
+    _showTranslateDialog(translationEdit, translator, data);
+  }
+
+  void _showTranslateDialog(
+      Translation translationEdit, GoogleTranslator translator, String data) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          titlePadding: const EdgeInsets.fromLTRB(10,20,10,0),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              const Icon(Icons.translate_rounded),
+              // SizedBox(width: 6,),
+              Text(
+                'Google Translate',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleLarge!
+                    .copyWith(fontWeight: FontWeight.bold),
+              ),
+              SizedBox(
+                width: 24,
+                child: PopupMenuButton(
+                  padding: EdgeInsets.zero,
+                  iconSize: 24,
+                  itemBuilder: (BuildContext context) => [],
+                ),
+              )
+            ],
+          ),
+          contentPadding: const EdgeInsets.fromLTRB(10,0,10,20),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Detected',
+                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                        color: Colors.deepPurple, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(
+                    width: 24,
+                    child: IconButton(
+                      onPressed: () {},
+                      icon: const Icon(
+                        Icons.volume_up_outlined,
+                        size: 24,
+                      ),
+                      padding: EdgeInsets.zero,
+                    ),
+                  )
+                ],
+              ),
+              TextField(
+                maxLines: 5,
+                minLines: 1,
+                style: Theme.of(context).textTheme.titleLarge,
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                ),
+                controller: _textTranslateController,
+                onEditingComplete: () async {
+                  translationEdit = await translator.translate(
+                    _textTranslateController.text,
+                    to: 'vi',
+                  );
+                  setState(() {
+                    data = translationEdit.toString();
+                  });
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                    _showTranslateDialog(translationEdit, translator, data);
+                  }
+                },
+              ),
+              Divider(
+                thickness: 4,
+                indent: 16,
+                endIndent: 16,
+                color: Colors.deepPurple[50],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Vietnamese',
+                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                        color: Colors.deepPurple, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(
+                    width: 24,
+                    child: IconButton(
+                      onPressed: () {},
+                      icon: const Icon(
+                        Icons.volume_up_outlined,
+                        size: 24,
+                      ),
+                      padding: EdgeInsets.zero,
+                    ),
+                  )
+                ],
+              ),
+              Flexible(
+                child:
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 200),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Text(
+                      data,
+                      style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                            color: Colors.deepPurple[600],
+                          ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   /// Removes the text selection menu from the overlay.
@@ -6749,6 +6897,7 @@ class PdfViewerController extends ChangeNotifier with _ValueChangeNotifier {
 
   /// Gets or sets a value indicating the type of annotation that should be drawn using UI interaction on the PDF pages.
   PdfAnnotationMode get annotationMode => _annotationMode;
+
   set annotationMode(PdfAnnotationMode value) {
     if (_annotationMode != value) {
       clearSelection();

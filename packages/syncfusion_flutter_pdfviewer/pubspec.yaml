@@ -66,6 +66,7 @@ dependencies:
     path: ../syncfusion_flutter_signaturepad
 
   url_launcher: ^6.1.0
+  translator: ^1.0.0
 
 dev_dependencies:
   flutter_test:

@@ -5,6 +5,7 @@ void main() {
   runApp(const MaterialApp(
     title: 'Syncfusion PDF Viewer Demo',
     home: HomePage(),
+    debugShowCheckedModeBanner: false,
   ));
 }
 

@@ -106,7 +106,7 @@ class _TextSelectionMenuState extends State<TextSelectionMenu> {
                 TextSelectionMenuItem(
                   title: widget
                       .localizations!.pdfTextSelectionMenuStrikethroughLabel,
-                  mode: 'Strikethrough',
+                  mode: 'Translate',
                   onSelected: widget.onSelected,
                   textDirection: widget.textDirection,
                   themeData: widget.themeData,
