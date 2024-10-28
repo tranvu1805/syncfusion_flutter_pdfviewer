@@ -67,6 +67,7 @@ dependencies:
 
   url_launcher: ^6.1.0
   translator: ^1.0.0
+  flutter_tts: ^4.0.2
 
 dev_dependencies:
   flutter_test:

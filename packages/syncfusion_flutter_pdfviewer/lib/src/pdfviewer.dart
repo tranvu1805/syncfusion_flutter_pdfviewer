@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:syncfusion_flutter_core/localizations.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
@@ -1232,6 +1233,7 @@ class SfPdfViewerState extends State<SfPdfViewer> with WidgetsBindingObserver {
 
   /// Used to extract text from the PDF document.
   TextExtractionEngine? _textExtractionEngine;
+  final flutterTts = FlutterTts();
 
   @override
   void initState() {
@@ -4488,7 +4490,7 @@ class SfPdfViewerState extends State<SfPdfViewer> with WidgetsBindingObserver {
         return AlertDialog(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          titlePadding: const EdgeInsets.fromLTRB(10,20,10,0),
+          titlePadding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -4511,7 +4513,7 @@ class SfPdfViewerState extends State<SfPdfViewer> with WidgetsBindingObserver {
               )
             ],
           ),
-          contentPadding: const EdgeInsets.fromLTRB(10,0,10,20),
+          contentPadding: const EdgeInsets.fromLTRB(10, 0, 10, 20),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -4527,7 +4529,13 @@ class SfPdfViewerState extends State<SfPdfViewer> with WidgetsBindingObserver {
                   SizedBox(
                     width: 24,
                     child: IconButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                        await flutterTts.setLanguage('en-US');
+                        await flutterTts.setSpeechRate(0.4);
+                        await flutterTts.setVolume(1.0);
+                        await flutterTts.setPitch(1.0);
+                        await flutterTts.speak(_textTranslateController.text);
+                      },
                       icon: const Icon(
                         Icons.volume_up_outlined,
                         size: 24,
@@ -4545,6 +4553,7 @@ class SfPdfViewerState extends State<SfPdfViewer> with WidgetsBindingObserver {
                   border: InputBorder.none,
                 ),
                 controller: _textTranslateController,
+                textInputAction: TextInputAction.done,
                 onEditingComplete: () async {
                   translationEdit = await translator.translate(
                     _textTranslateController.text,
@@ -4587,8 +4596,7 @@ class SfPdfViewerState extends State<SfPdfViewer> with WidgetsBindingObserver {
                 ],
               ),
               Flexible(
-                child:
-                ConstrainedBox(
+                child: ConstrainedBox(
                   constraints: const BoxConstraints(maxHeight: 200),
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.only(bottom: 10),
